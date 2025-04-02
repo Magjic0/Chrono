@@ -1,11 +1,20 @@
-version: '3'
-
+version: "3.9"
 services:
-  boiler:
+  chrono:
     build: .
-    image: boiler
-    ports:
-        - "3000:3000"
-    volumes:
-        - ./:/usr/src/app
-        - /usr/src/app/node_modules
+    container_name: chrono
+    networks:
+      - shared-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chrono.rule=Host(`chrono.manifesto-app.fr`)"
+      - "traefik.http.services.chrono.loadbalancer.server.port=3000"
+      - "traefik.http.routers.chrono.entrypoints=websecure"
+      - "traefik.http.routers.chrono.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.chrono-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.chrono-http.rule=Host(`chrono.manifesto-app.fr`)"
+      - "traefik.http.routers.chrono-http.entrypoints=web"
+      - "traefik.http.routers.chrono-http.middlewares=chrono-redirect"
+networks:
+  shared-network:
+    external: true
